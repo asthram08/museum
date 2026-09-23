@@ -7,13 +7,15 @@
   id        short name with no spaces, used in the NFC tag link (never change it after writing a tag)
   keychain  photo of the keychain itself (optional; a gold medallion is shown if left blank)
   tagUid    only needed for the Raspberry Pi reader later; the Tags page shows how to find it
-  photos    upload image files named like <id>-1.jpg, <id>-2.jpg (no folders) and list them here
+  photos    how many photos the trip has. Name the files <id>-1.jpg, <id>-2.jpg, <id>-3.jpg ...
+            and upload them next to this file (no folders). photos: 40 means kyoto-1.jpg to kyoto-40.jpg.
+            The first 3 get gold frames; all of them appear in the album below.
   music     optional mp3 in the trip folder, plays when a visitor taps the music button
 */
 
 window.MUSEUM = {
-  title: "EverAfter",
-  subtitle: "A Museum of My Travels",
+  title: "Pran Travels",
+  subtitle: "A Museum of Our Travels",
   owner: "Praveena",
 
   // After a trip opens on the museum screen, go back to the wall after this many minutes of no touches.
@@ -32,12 +34,7 @@ window.MUSEUM = {
       story:
         "Cherry blossoms were a week early, so every street felt like a party. We walked through thousands of torii gates at Fushimi Inari before sunrise and had the mountain almost to ourselves.",
       highlights: ["Fushimi Inari at 6am", "Matcha everything in Uji", "Getting lost in Gion at night"],
-      photos: [
-        { src: "kyoto-1.jpg", caption: "The first gate" },
-        { src: "kyoto-2.jpg", caption: "Philosopher's Path" },
-        { src: "kyoto-3.jpg", caption: "Arashiyama bamboo" },
-        { src: "kyoto-4.jpg", caption: "Last sunset" }
-      ],
+      photos: 12,
       music: ""
     },
     {
@@ -52,12 +49,7 @@ window.MUSEUM = {
       story:
         "Egg coffee, scooters in every direction, and a night cruise through Ha Long Bay. The lotus keychain came from a tiny stall near Hoan Kiem Lake.",
       highlights: ["Egg coffee at Giang", "Ha Long Bay overnight", "Train Street"],
-      photos: [
-        { src: "hanoi-1.jpg", caption: "Old Quarter morning" },
-        { src: "hanoi-2.jpg", caption: "Ha Long Bay" },
-        { src: "hanoi-3.jpg", caption: "Lotus pond" },
-        { src: "hanoi-4.jpg", caption: "Street food crawl" }
-      ],
+      photos: 4,
       music: ""
     },
     {
@@ -72,12 +64,7 @@ window.MUSEUM = {
       story:
         "Yellow trams, blue tiles, and a pastel de nata at every stop. We timed the Miradouro sunsets every single evening.",
       highlights: ["Tram 28", "Pastéis de Belém", "Sintra day trip"],
-      photos: [
-        { src: "lisbon-1.jpg", caption: "Alfama rooftops" },
-        { src: "lisbon-2.jpg", caption: "Golden hour" },
-        { src: "lisbon-3.jpg", caption: "Belém" },
-        { src: "lisbon-4.jpg", caption: "Sintra" }
-      ],
+      photos: 4,
       music: ""
     }
   ]
