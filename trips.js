@@ -10,7 +10,10 @@
   photos    how many photos the trip has. Name the files <id>-1.jpg, <id>-2.jpg, <id>-3.jpg ...
             and upload them next to this file (no folders). photos: 40 means kyoto-1.jpg to kyoto-40.jpg.
             The first 3 get gold frames; all of them appear in the album below.
-  music     optional mp3 in the trip folder, plays when a visitor taps the music button
+  colors    optional flag colors for the medallion, with stripes: "vertical" or "horizontal"
+  cities    optional list of places, shown under the trip name
+  stops     optional day-by-day route: { date: "2023-04-02", place: "Venice", note: "Train from Milan" }
+  music     optional mp3 file, plays when a visitor taps the music button
 */
 
 window.MUSEUM = {
@@ -23,48 +26,57 @@ window.MUSEUM = {
 
   trips: [
     {
-      id: "kyoto",
-      place: "Kyoto",
-      country: "Japan",
-      start: "2025-04-02",
-      end: "2025-04-09",
-      color: "#b3342f",
+      id: "italy2023",
+      place: "Italy",
+      country: "Italy",
+      cities: ["Milan", "Venice", "Florence", "Tuscany", "Amalfi Coast", "Rome"],
+      start: "2023-03-31",
+      end: "2023-04-10",
+      color: "#1f7a4a",
+      colors: ["#009246", "#F4F5F0", "#CE2B37"],
+      stripes: "vertical",
       keychain: "",
       tagUid: "",
-      story:
-        "Cherry blossoms were a week early, so every street felt like a party. We walked through thousands of torii gates at Fushimi Inari before sunrise and had the mountain almost to ourselves.",
-      highlights: ["Fushimi Inari at 6am", "Matcha everything in Uji", "Getting lost in Gion at night"],
-      photos: 12,
+      story: "",
+      highlights: [],
+      stops: [
+        { date: "2023-03-31", place: "San Francisco to Milan", note: "Evening flight from SFO" },
+        { date: "2023-04-01", place: "Milan" },
+        { date: "2023-04-02", place: "Venice", note: "Train from Milan" },
+        { date: "2023-04-03", place: "Florence", note: "Train from Venice" },
+        { date: "2023-04-04", place: "Florence", note: "Museums and monuments, then a rental car to the agriturismo" },
+        { date: "2023-04-05", place: "Tuscany", note: "Siena, Chianti and the hill towns" },
+        { date: "2023-04-06", place: "Amalfi Coast", note: "Car returned in Florence, on to the coast" },
+        { date: "2023-04-07", place: "Amalfi Coast", note: "Bus ride along the coast" },
+        { date: "2023-04-08", place: "Capri, then Rome" },
+        { date: "2023-04-09", place: "Rome", note: "Colosseum, Roman Forum, Trevi Fountain, Vatican City" },
+        { date: "2023-04-10", place: "Rome to San Francisco", note: "Morning flight home" }
+      ],
+      photos: 0,
       music: ""
     },
     {
-      id: "hanoi",
-      place: "Hanoi",
-      country: "Vietnam",
-      start: "2024-11-14",
-      end: "2024-11-20",
-      color: "#c2477a",
+      id: "spain2024",
+      place: "Spain",
+      country: "Spain",
+      cities: ["Madrid", "Seville", "Granada", "Barcelona"],
+      start: "2024-03-29",
+      end: "2024-04-07",
+      color: "#a3171d",
+      colors: ["#AA151B", "#F1BF00", "#AA151B"],
+      stripes: "horizontal",
+      stripeWeights: [1, 2, 1],
       keychain: "",
       tagUid: "",
-      story:
-        "Egg coffee, scooters in every direction, and a night cruise through Ha Long Bay. The lotus keychain came from a tiny stall near Hoan Kiem Lake.",
-      highlights: ["Egg coffee at Giang", "Ha Long Bay overnight", "Train Street"],
-      photos: 4,
-      music: ""
-    },
-    {
-      id: "lisbon",
-      place: "Lisbon",
-      country: "Portugal",
-      start: "2024-06-01",
-      end: "2024-06-06",
-      color: "#2f6fb3",
-      keychain: "",
-      tagUid: "",
-      story:
-        "Yellow trams, blue tiles, and a pastel de nata at every stop. We timed the Miradouro sunsets every single evening.",
-      highlights: ["Tram 28", "Pastéis de Belém", "Sintra day trip"],
-      photos: 4,
+      story: "",
+      highlights: [],
+      stops: [
+        { place: "Madrid" },
+        { place: "Seville" },
+        { place: "Granada" },
+        { place: "Barcelona" }
+      ],
+      photos: 0,
       music: ""
     }
   ]

@@ -132,6 +132,14 @@
   .card .meta{font-family:var(--sans);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7;margin-bottom:14px}
   .card p{font-size:21px;line-height:1.5;margin:0}
   .card ul{margin:16px 0 0;padding-left:20px;font-size:19px;line-height:1.6}
+  .route-title{font-family:var(--sans);font-size:12px;letter-spacing:.18em;text-transform:uppercase;opacity:.7;margin:22px 0 10px}
+  .route{list-style:none;margin:0;padding:0 0 0 18px;border-left:2px solid rgba(90,60,10,.35)}
+  .route li{position:relative;padding:0 0 14px 6px;font-size:19px;line-height:1.35}
+  .route li:before{content:"";position:absolute;left:-25px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--c,#8a5a2b);box-shadow:0 0 0 3px #f3e6c8}
+  .route .d{display:block;font-family:var(--sans);font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.65}
+  .route .n{display:block;font-size:17px;opacity:.8;font-style:italic}
+  .medal.flag .ring{background:rgba(20,12,8,.32);backdrop-filter:blur(1px)}
+  .reveal .band{position:absolute;top:0;left:0;right:0;height:6px;opacity:.9}
   .actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding-bottom:60px}
 
   /* ---------- lightbox / slideshow ---------- */
@@ -240,10 +248,22 @@
     else t.photos = (p || []).map(x => typeof x === "string" ? { src: x } : x);
   });
 
+  // colors: ["#008C45","#F4F5F0","#CD212A"] with stripes "vertical" (default) or "horizontal"
+  function flagBg(t, deg) {
+    const c = t.colors; if (!c || !c.length) return "";
+    const d = deg ?? (t.stripes === "horizontal" ? 180 : 90);
+    const w = t.stripeWeights || c.map(() => 1), tot = w.reduce((a, b) => a + b, 0);
+    let at = 0; const stops = c.map((col, i) => { const a = at / tot * 100; at += w[i]; return `${col} ${a}% ${at / tot * 100}%`; });
+    return `linear-gradient(${d}deg, ${stops.join(", ")})`;
+  }
+  const subLine = t => t.cities?.length ? t.cities.join(" · ") : t.country;
+  const plaqueSub = t => (t.country && t.country !== t.place ? `${t.country} · ` : "") + year(t);
+
   function medal(t, size) {
     if (t.keychain) return `<img src="${esc(t.keychain)}" alt="${esc(t.place)} keychain">`;
     const initials = (t.place || "?").split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
-    return `<div class="medal" style="--c:${esc(t.color || "#8a5a2b")}"><div class="ring"><span style="font-size:${size}px">${esc(initials)}<em>${esc(year(t))}</em></span></div></div>`;
+    const flag = flagBg(t);
+    return `<div class="medal${flag ? " flag" : ""}" style="--c:${esc(t.color || "#8a5a2b")}${flag ? ";background:" + flag : ""}"><div class="ring"><span style="font-size:${size}px">${esc(initials)}<em>${esc(year(t))}</em></span></div></div>`;
   }
 
   /* ---------------- views ---------------- */
@@ -260,7 +280,7 @@
         ${M.trips.length ? `<div class="grid">${wallOrder.map(t => `
           <a class="exhibit" href="#/trip/${encodeURIComponent(t.id)}">
             <div class="spot" style="width:100%"><div class="frame oval"><div class="mat">${medal(t, 54)}</div></div></div>
-            <div class="plaque"><small>No. ${exhibitNo(t)}</small><b>${esc(t.place)}</b><small>${esc(t.country)} · ${esc(year(t))}</small></div>
+            <div class="plaque"><small>No. ${exhibitNo(t)}</small><b>${esc(t.place)}</b><small>${esc(plaqueSub(t))}</small></div>
           </a>`).join("")}</div>`
         : `<p class="empty">No trips yet. Add your first one in trips.js.</p>`}
       </section>`;
@@ -277,11 +297,11 @@
     const photos = t.photos || [];
     app.innerHTML = `
       <section class="reveal" style="--c:${esc(t.color || "#8a5a2b")}">
-        <div class="tag">NFC MEMORY FOUND</div>
+        ${t.colors ? `<div class="band" style="background:${flagBg(t, 90)}"></div>` : ""}<div class="tag">NFC MEMORY FOUND</div>
         <div class="left">
           <div class="label">Destination</div>
           <div class="dest">${esc(t.place)}</div>
-          <div class="country">${esc(t.country)}</div>
+          <div class="country">${esc(subLine(t))}</div>
           <div class="label" style="margin-top:14px">Exhibit No. ${exhibitNo(t)}</div>
         </div>
         <div class="keyring"><div class="frame oval"><div class="mat">${medal(t, 90)}</div></div></div>
@@ -301,15 +321,16 @@
             <div class="frame ${shapes[i]}" data-i="${i}"><div class="mat"><img src="${esc(p.src)}" alt=""></div></div>
             ${p.caption ? `<div class="plaque"><b>${esc(p.caption)}</b></div>` : ""}
           </figure>`).join("")}</div>`
-        : `<p class="empty">Add photos for this trip in trips.js</p>`}
+        : `<p class="empty">Photos coming soon</p>`}
       </section>
 
-      ${t.story || (t.highlights || []).length ? `<section class="placard">
+      ${t.story || (t.highlights || []).length || (t.stops || []).length ? `<section class="placard" style="--c:${esc(t.color || "#8a5a2b")}">
         <div class="card">
-          <h3>${esc(t.place)}, ${esc(t.country)}</h3>
+          <h3>${esc(t.country && t.country !== t.place ? t.place + ", " + t.country : t.place)}</h3>
           <div class="meta">${esc(fmt(parse(t.start)))} to ${esc(fmt(parse(t.end)))}</div>
           ${t.story ? `<p>${esc(t.story)}</p>` : ""}
           ${(t.highlights || []).length ? `<ul>${t.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>` : ""}
+          ${(t.stops || []).length ? `<div class="route-title">The route</div><ol class="route">${t.stops.map(st => `<li>${st.date ? `<span class="d">${esc(parse(st.date).toLocaleDateString(undefined, { month: "short", day: "numeric" }))}</span>` : ""}<b>${esc(st.place)}</b>${st.note ? `<span class="n">${esc(st.note)}</span>` : ""}</li>`).join("")}</ol>` : ""}
         </div>
       </section>` : ""}
 
