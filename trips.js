@@ -180,7 +180,7 @@ window.MUSEUM = {
       music: "",
       id: "universal2022",
       place: "Universal Studios",
-      country: "USA",
+      country: "Hollywood",
       when: "Spring 2022",
       year: 2022,
       color: "#6b3fa0",
