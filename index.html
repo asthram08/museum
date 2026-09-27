@@ -57,6 +57,7 @@
     border:3px solid rgba(255,235,180,.85);box-shadow:inset 0 0 0 6px rgba(0,0,0,.15)}
   .medal .ring span{font-family:var(--serif);color:#fff7e2;font-weight:700;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.35)}
   .medal .ring em{display:block;font-style:normal;font-family:var(--sans);font-size:.28em;letter-spacing:.2em;margin-top:.4em;opacity:.9}
+  .medal .ring em.long{font-size:.2em;letter-spacing:.1em}
 
   /* ---------- wall (home) ---------- */
   .hall{background:
@@ -229,14 +230,26 @@
   const normUid = u => String(u || "").toUpperCase().replace(/[^0-9A-F]/g, "");
 
   // oldest trip = exhibit No. 01
-  const byDate = [...M.trips].sort((a, b) => (a.start || "").localeCompare(b.start || ""));
+  // trips can have exact dates (start/end), a season (year + when: "Spring 2022"), or several visits (visits: [2016, 2023])
+  const SEASON = { winter: "01", spring: "03", summer: "06", fall: "09", autumn: "09" };
+  const sortKey = t => {
+    if (t.start) return t.start;
+    const y = String((t.visits && t.visits[0]) || t.year || "");
+    const m = SEASON[String(t.when || "").toLowerCase().split(" ")[0]] || "01";
+    return `${y}-${m}-01`;
+  };
+  const byDate = [...M.trips].sort((a, b) => sortKey(a).localeCompare(sortKey(b)));
   const exhibitNo = t => String(byDate.indexOf(t) + 1).padStart(2, "0");
   const wallOrder = [...byDate].reverse();
 
   const parse = d => { if (!d) return null; const [y, m, dd] = d.split("-").map(Number); return new Date(y, m - 1, dd || 1); };
   const fmt = d => d ? d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "";
   const days = t => { const a = parse(t.start), b = parse(t.end); return a && b ? Math.round((b - a) / 864e5) + 1 : null; };
-  const year = t => (t.start || "").slice(0, 4);
+  const year = t => t.start ? t.start.slice(0, 4) : String((t.visits && t.visits[t.visits.length - 1]) || t.year || "");
+  const multi = t => (t.visits || []).length > 1;
+  const yearLabel = t => multi(t) ? `SINCE ${t.visits[0]}` : year(t);
+  const whenText = t => t.start && t.end ? `${fmt(parse(t.start))} to ${fmt(parse(t.end))}`
+    : multi(t) ? `Visited ${t.visits.join(", ")}` : (t.when || year(t));
 
   document.title = M.title || "Pran Travels";
   $("#brand").textContent = (M.title || "Pran Travels").toUpperCase();
@@ -251,19 +264,20 @@
   // colors: ["#008C45","#F4F5F0","#CD212A"] with stripes "vertical" (default) or "horizontal"
   function flagBg(t, deg) {
     const c = t.colors; if (!c || !c.length) return "";
+    const band = t.band ? `linear-gradient(90deg, ${t.band} 0 26%, transparent 26%), ` : "";
     const d = deg ?? (t.stripes === "horizontal" ? 180 : 90);
     const w = t.stripeWeights || c.map(() => 1), tot = w.reduce((a, b) => a + b, 0);
     let at = 0; const stops = c.map((col, i) => { const a = at / tot * 100; at += w[i]; return `${col} ${a}% ${at / tot * 100}%`; });
-    return `linear-gradient(${d}deg, ${stops.join(", ")})`;
+    return `${band}linear-gradient(${d}deg, ${stops.join(", ")})`;
   }
   const subLine = t => t.cities?.length ? t.cities.join(" · ") : t.country;
-  const plaqueSub = t => (t.country && t.country !== t.place ? `${t.country} · ` : "") + year(t);
+  const plaqueSub = t => (t.country && t.country !== t.place ? `${t.country} · ` : "") + (multi(t) ? `${t.visits.length} visits` : year(t));
 
   function medal(t, size) {
     if (t.keychain) return `<img src="${esc(t.keychain)}" alt="${esc(t.place)} keychain">`;
-    const initials = (t.place || "?").split(/\s+/).map(w => w[0]).join("").slice(0, 2).toUpperCase();
+    const initials = t.mono || (t.place || "?").split(/\s+/).filter(w => /^[A-Za-z]/.test(w)).map(w => w[0]).join("").slice(0, 2).toUpperCase();
     const flag = flagBg(t);
-    return `<div class="medal${flag ? " flag" : ""}" style="--c:${esc(t.color || "#8a5a2b")}${flag ? ";background:" + flag : ""}"><div class="ring"><span style="font-size:${size}px">${esc(initials)}<em>${esc(year(t))}</em></span></div></div>`;
+    return `<div class="medal${flag ? " flag" : ""}" style="--c:${esc(t.color || "#8a5a2b")}${flag ? ";background:" + flag : ""}"><div class="ring"><span style="font-size:${size}px">${esc(initials)}<em${yearLabel(t).length > 5 ? ' class="long"' : ""}>${esc(yearLabel(t))}</em></span></div></div>`;
   }
 
   /* ---------------- views ---------------- */
@@ -307,9 +321,12 @@
         <div class="keyring"><div class="frame oval"><div class="mat">${medal(t, 90)}</div></div></div>
         <div class="right">
           <div class="facts">
-            <div><div class="label">Arrived</div><b>${esc(fmt(parse(t.start)))}</b></div>
+            ${t.start && t.end ? `<div><div class="label">Arrived</div><b>${esc(fmt(parse(t.start)))}</b></div>
             <div><div class="label">Departed</div><b>${esc(fmt(parse(t.end)))}</b></div>
-            ${n ? `<div><div class="label">Stayed</div><span class="days">${n}</span> days</div>` : ""}
+            ${n ? `<div><div class="label">Stayed</div><span class="days">${n}</span> days</div>` : ""}`
+            : multi(t) ? `<div><div class="label">Visits</div><span class="days">${t.visits.length}</span> trips</div>
+            <div><div class="label">Years</div><b>${esc(t.visits.join(" · "))}</b></div>`
+            : `<div><div class="label">When</div><b>${esc(t.when || year(t))}</b></div>`}
           </div>
         </div>
         <button class="pill enter" id="enterBtn">Enter the gallery &#8595;</button>
@@ -327,7 +344,7 @@
       ${t.story || (t.highlights || []).length || (t.stops || []).length ? `<section class="placard" style="--c:${esc(t.color || "#8a5a2b")}">
         <div class="card">
           <h3>${esc(t.country && t.country !== t.place ? t.place + ", " + t.country : t.place)}</h3>
-          <div class="meta">${esc(fmt(parse(t.start)))} to ${esc(fmt(parse(t.end)))}</div>
+          <div class="meta">${esc(whenText(t))}</div>
           ${t.story ? `<p>${esc(t.story)}</p>` : ""}
           ${(t.highlights || []).length ? `<ul>${t.highlights.map(h => `<li>${esc(h)}</li>`).join("")}</ul>` : ""}
           ${(t.stops || []).length ? `<div class="route-title">The route</div><ol class="route">${t.stops.map(st => `<li>${st.date ? `<span class="d">${esc(parse(st.date).toLocaleDateString(undefined, { month: "short", day: "numeric" }))}</span>` : ""}<b>${esc(st.place)}</b>${st.note ? `<span class="n">${esc(st.note)}</span>` : ""}</li>`).join("")}</ol>` : ""}
